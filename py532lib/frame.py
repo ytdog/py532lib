@@ -139,7 +139,6 @@ class Pn532Frame:
         response_length = response[0][PN532_FRAME_POSITION_LENGTH] + 1
         data = bytearray(
             response[0][PN532_FRAME_POSITION_DATA_START:PN532_FRAME_POSITION_DATA_START + response_length - 2])
-
         return Pn532Frame(
             preamble=response[0][PN532_FRAME_POSITION_PREAMBLE],
             start_code_1=response[0][PN532_FRAME_POSITION_START_CODE_1],

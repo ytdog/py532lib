@@ -22,10 +22,11 @@ if uid:
 """
 
 import py532lib.i2c as i2c
-from py532lib.frame import Pn532Frame as Pn532Frame
+from py532lib.frame import Pn532Frame
 from py532lib.constants import *
 import logging
 import math
+
 
 MIFARE_COMMAND_AUTH_A = 0x60
 MIFARE_COMMAND_AUTH_B = 0x61
@@ -35,6 +36,7 @@ MIFARE_COMMAND_WRITE_4 = 0xA2
 MIFARE_FACTORY_KEY = b"\xFF\xFF\xFF\xFF\xFF\xFF"
 MIFARE_WAIT_FOR_ENTRY = 0xFF # MxRtyPassiveActivation value: wait until card enters field.
 MIFARE_SAFE_RETRIES = 5 # This number of retries seems to detect most cards properlies.
+
 
 class Mifare(i2c.Pn532_i2c):
 
@@ -122,6 +124,20 @@ class Mifare(i2c.Pn532_i2c):
             raise IOError("InDeselect failed (error frame returned)")
         response = response_frame.get_data()
         logging.debug("InDeselect response: " + " ".join("{0:02X}".format(k) for k in response))
+        if response[1] != 0x00:
+            # Only the status byte was returned. There was an error.
+            raise IOError("InDataExchange returned error status: {0:#x}".format(response[1]))
+
+    def in_release(self):
+        """Releases the current target."""
+        logging.debug("InRelease sending...")
+        frame = Pn532Frame(frame_type=PN532_FRAME_TYPE_DATA, data=bytearray([PN532_COMMAND_INRELEASE, 0x01]))
+        self.send_command_check_ack(frame)
+        response_frame = self.read_response()
+        if response_frame.get_frame_type() == PN532_FRAME_TYPE_ERROR:
+            raise IOError("InRelease failed (error frame returned)")
+        response = response_frame.get_data()
+        logging.debug("InRelease response: " + " ".join("{0:02X}".format(k) for k in response))
         if response[1] != 0x00:
             # Only the status byte was returned. There was an error.
             raise IOError("InDataExchange returned error status: {0:#x}".format(response[1]))

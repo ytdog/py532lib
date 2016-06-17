@@ -20,9 +20,8 @@ from py532lib.frame import *
 from py532lib.constants import *
 
 
-LOGGING_ENABLED = False
 LOG_LEVEL = logging.DEBUG
-DEFAULT_DELAY = 0.005
+DEFAULT_DELAY = 0.1
 
 
 class Pn532_i2c:
@@ -35,7 +34,8 @@ class Pn532_i2c:
     i2c_channel = None
     logger = None
 
-    def __init__(self, address=PN532_I2C_SLAVE_ADDRESS, i2c_channel=RPI_DEFAULT_I2C_NEW):
+    def __init__(self, address=PN532_I2C_SLAVE_ADDRESS,
+                 i2c_channel=RPI_DEFAULT_I2C_NEW, LOGGING_ENABLED=False):
         """Constructor for the Pn532_i2c class.
 
         Arguments:
@@ -68,7 +68,7 @@ class Pn532_i2c:
         else:
             return False
 
-    def read_response(self):
+    def read_response(self, n_bytes=255):
         """Wait, then read for a response from the PN532."""
         logging.debug("readResponse...")
         response = [b'\x00\x00\x00\x00\x00\x00\x00']
@@ -79,8 +79,9 @@ class Pn532_i2c:
                 logging.debug("readResponse..............Reading.")
 
                 sleep(DEFAULT_DELAY)
+                logging.debug("readResponse..............Transaction.")
                 response = self.PN532.transaction(
-                    reading(self.address, 255))
+                    reading(self.address, n_bytes))
                 logging.debug(response)
                 logging.debug("readResponse..............Read.")
             except Exception:
@@ -127,6 +128,7 @@ class Pn532_i2c:
                 self.reset_i2c()
                 sleep(DEFAULT_DELAY)
             else:
+                logging.debug("send_command...........True.")
                 return True
 
     def read_ack(self):
@@ -135,11 +137,13 @@ class Pn532_i2c:
 
         while True:
             sleep(DEFAULT_DELAY)
-            response_frame = self.read_response()
+            response_frame = self.read_response(n_bytes=7)
 
             if response_frame.get_frame_type() == PN532_FRAME_TYPE_ACK:
+                logging.debug("read_ack...........True.")
                 return True
             else:
+                logging.debug("read_ack...........Pass.")
                 pass
 
     def read_mifare(self):
@@ -172,7 +176,7 @@ class Pn532_i2c:
                                    [PN532_COMMAND_SAMCONFIGURATION,
                                     PN532_SAMCONFIGURATION_MODE_NORMAL,
                                     PN532_SAMCONFIGURATION_TIMEOUT_50MS,
-                                    PN532_SAMCONFIGURATION_IRQ_OFF]))
+                                    PN532_SAMCONFIGURATION_IRQ_ON]))
 
         self.send_command_check_ack(frame)
 
