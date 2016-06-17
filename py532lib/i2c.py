@@ -9,9 +9,6 @@ This module contains classes and functions related to I2C communication for the 
 
 import os
 import sys
-lib_path = os.path.abspath('../')
-sys.path.append(lib_path)
-
 from time import sleep
 import logging
 from quick2wire.i2c import I2CMaster, reading, writing
@@ -19,6 +16,8 @@ from py532lib.i2c import *
 from py532lib.frame import *
 from py532lib.constants import *
 
+lib_path = os.path.abspath('../')
+sys.path.append(lib_path)
 
 LOG_LEVEL = logging.DEBUG
 DEFAULT_DELAY = 0.1

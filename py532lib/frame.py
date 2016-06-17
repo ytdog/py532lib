@@ -9,12 +9,12 @@ This module contains classes and functions related to communication frames for t
 
 import os
 import sys
-lib_path = os.path.abspath('../')
-sys.path.append(lib_path)
-
 from py532lib.i2c import *
 from py532lib.frame import *
 from py532lib.constants import *
+
+lib_path = os.path.abspath('../')
+sys.path.append(lib_path)
 
 
 class Pn532Frame:
@@ -29,7 +29,7 @@ class Pn532Frame:
         start_code_2=PN532_START_CODE_2,
         frame_identifier=0xD4,
         data=bytearray(),
-            postamble=PN532_POSTAMBLE):
+        postamble=PN532_POSTAMBLE):
         """Constructor for the Pn532Frame class.
 
         Arguments:
@@ -105,7 +105,7 @@ class Pn532Frame:
             byte_array.append(PN532_START_CODE_2)
             byte_array.append(PN532_POSTAMBLE)
 
-            return (byte_array)
+            return byte_array
 
         byte_array.append(self._preamble)
         byte_array.append(self._startCode1)
@@ -120,7 +120,7 @@ class Pn532Frame:
         byte_array.append(self.get_data_checksum())
         byte_array.append(self._postamble)
 
-        return (byte_array)
+        return byte_array
 
     @staticmethod
     def from_response(response):
